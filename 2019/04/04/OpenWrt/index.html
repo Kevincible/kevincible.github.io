@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+<link rel="preconnect" href="https://fonts.proxy.ustclug.org" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/timg-crop.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/timg-crop.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/timg-crop.png">
+  <link rel="mask-icon" href="/images/timg-crop.png" color="#222">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.proxy.ustclug.org/css?family=Lato:300,300italic,400,400italic,700,700italic|Pacifico:300,300italic,400,400italic,700,700italic|Fira+Code:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kvcb.me","root":"/","scheme":"Pisces","version":"8.0.1","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta property="og:type" content="article">
+<meta property="og:title" content="OpenWrt透明代理的食用指南">
+<meta property="og:url" content="https://kvcb.me/2019/04/04/OpenWrt/index.html">
+<meta property="og:site_name" content="Interstella 5555">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kvcb.me/2019/04/04/OpenWrt/logo.png">
+<meta property="og:image" content="https://kvcb.me/2019/04/04/OpenWrt/opmenu.jpg">
+<meta property="og:image" content="https://kvcb.me/2019/04/04/OpenWrt/acctr.jpg">
+<meta property="og:image" content="https://kvcb.me/2019/04/04/OpenWrt/dns-forwarder.jpg">
+<meta property="og:image" content="https://kvcb.me/2019/04/04/OpenWrt/chinadns.jpg">
+<meta property="og:image" content="https://kvcb.me/2019/04/04/OpenWrt/dhcp-2.jpg">
+<meta property="og:image" content="https://kvcb.me/2019/04/04/OpenWrt/dhcp-1.jpg">
+<meta property="og:image" content="https://kvcb.me/2019/04/04/OpenWrt/wan-conf.jpg">
+<meta property="article:published_time" content="2019-04-04T10:10:16.000Z">
+<meta property="article:modified_time" content="2019-04-23T14:24:45.000Z">
+<meta property="article:author" content="Kevin Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kvcb.me/2019/04/04/OpenWrt/logo.png">
+
+
+<link rel="canonical" href="https://kvcb.me/2019/04/04/OpenWrt/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>OpenWrt透明代理的食用指南 | Interstella 5555</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Interstella 5555</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">1</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-kms激活服务">
+
+    <a href="https://kms.kvcb.me/" rel="noopener" target="_blank"><i class="fab fa-windows fa-fw"></i>KMS激活服务</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%89%80%E9%9C%80%E8%BD%AF%E4%BB%B6%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-number">1.</span> <span class="nav-text">一、所需软件的安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81Shadowsocks-%E9%85%8D%E7%BD%AE"><span class="nav-number">2.</span> <span class="nav-text">二、Shadowsocks 配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E8%A7%A3%E5%86%B3DNS%E6%B1%A1%E6%9F%93%E9%97%AE%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">三、解决DNS污染问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DNS-forwarder%E7%9A%84%E9%85%8D%E7%BD%AE"><span class="nav-number">3.1.</span> <span class="nav-text">DNS-forwarder的配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ChinaDNS%E9%85%8D%E7%BD%AE"><span class="nav-number">3.2.</span> <span class="nav-text">ChinaDNS配置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81dnsmasq%E9%85%8D%E7%BD%AE"><span class="nav-number">4.</span> <span class="nav-text">四、dnsmasq配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DHCP%E9%85%8D%E7%BD%AE"><span class="nav-number">4.1.</span> <span class="nav-text">DHCP配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OpenWrt%E6%9C%AC%E6%9C%BA%E7%9A%84DNS%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%AE%BE%E7%BD%AE"><span class="nav-number">4.2.</span> <span class="nav-text">OpenWrt本机的DNS服务器设置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E7%95%AA%E5%A4%96"><span class="nav-number">5.</span> <span class="nav-text">五、番外</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%8D%E4%BB%A3%E7%90%86%E7%9A%84%E5%9F%9F%E5%90%8D"><span class="nav-number">5.1.</span> <span class="nav-text">1、自定义不代理的域名</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85dnsmasq-full"><span class="nav-number">5.1.1.</span> <span class="nav-text">安装dnsmasq-full</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0china-list%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">5.1.2.</span> <span class="nav-text">添加china-list配置文件</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E4%BD%BF%E7%94%A8cron%E8%87%AA%E5%8A%A8%E5%8C%96"><span class="nav-number">5.2.</span> <span class="nav-text">2、使用cron自动化</span></a></li></ol></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kevin Chen"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Kevin Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license site-overview-item animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+  <div class="links-of-blogroll site-overview-item animated">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://ciyou.me/" title="https:&#x2F;&#x2F;ciyou.me&#x2F;" rel="noopener" target="_blank">Ciyou's Notebook</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://dengxz.me/" title="https:&#x2F;&#x2F;dengxz.me&#x2F;" rel="noopener" target="_blank">dengxz's blog</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://rickylee.monster/blog/" title="https:&#x2F;&#x2F;rickylee.monster&#x2F;blog&#x2F;" rel="noopener" target="_blank">Ricky Lee's BLOG</a>
+        </li>
+    </ul>
+  </div>
+
+      </section>
+        <div class="back-to-top animated">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+
+  <a href="https://github.com/kevincible" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://kvcb.me/2019/04/04/OpenWrt/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Kevin Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Interstella 5555">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OpenWrt透明代理的食用指南
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-04-04 18:10:16" itemprop="dateCreated datePublished" datetime="2019-04-04T18:10:16+08:00">2019-04-04</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2019-04-23 22:24:45" itemprop="dateModified" datetime="2019-04-23T22:24:45+08:00">2019-04-23</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Tutorial/" itemprop="url" rel="index"><span itemprop="name">Tutorial</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="/2019/04/04/OpenWrt/logo.png" alt="logo"></p>
+<a id="more"></a>
+
+<p>本文主要介绍了如何在Openwrt环境下进行透明代理的搭建，在Openwrt所支持的luci图形化界面下进行配置大大简化了配置的过程。在配置完成后，所有接入该路由器的设备都可以科学访问被墙网站。</p>
+<h2 id="一、所需软件的安装"><a href="#一、所需软件的安装" class="headerlink" title="一、所需软件的安装"></a>一、所需软件的安装</h2><p>从原作者<a target="_blank" rel="noopener" href="https://github.com/aa65535">aa65535</a>的源<a target="_blank" rel="noopener" href="http://openwrt-dist.sourceforge.net/%E8%BF%9B%E8%A1%8C%E5%AE%89%E8%A3%85">http://openwrt-dist.sourceforge.net/进行安装</a><br>首先添加Public-key</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wget http://openwrt-dist.sourceforge.net/openwrt-dist.pub</span><br><span class="line">opkg-key add openwrt-dist.pub</span><br></pre></td></tr></table></figure>
+
+<p>然后通过下面的命令获取处理器架构</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">opkg print-architecture | awk &#x27;&#123;print $2&#125;&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>然后向 <code>/etc/opkg/customfeeds.conf</code> 中添加</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">src/gz openwrt_dist http://openwrt-dist.sourceforge.net/packages/base/&#123;architecture&#125;</span><br><span class="line">src/gz openwrt_dist_luci http://openwrt-dist.sourceforge.net/packages/luci</span><br></pre></td></tr></table></figure>
+<ul>
+<li>例如我所使用的小米路由器3G  <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@OpenWrt:~# opkg print-architecture | awk &#x27;&#123;print $2&#125;&#x27;</span><br><span class="line">all</span><br><span class="line">noarch</span><br><span class="line">mipsel_24kc</span><br></pre></td></tr></table></figure>
+  那么我向 <code>/etc/opkg/customfeeds.conf</code> 中添加  <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">src/gz openwrt_dist http://openwrt-dist.sourceforge.net/packages/base/mipsel_24kc</span><br><span class="line">src/gz openwrt_dist_luci http://openwrt-dist.sourceforge.net/packages/luci</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p>然后</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">opkg update</span><br><span class="line">opkg install ChinaDNS luci-app-chinadns</span><br><span class="line">opkg install dns-forwarder luci-app-dns-forwarder</span><br><span class="line">opkg install shadowsocks-libev luci-app-shadowsocks</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="二、Shadowsocks-配置"><a href="#二、Shadowsocks-配置" class="headerlink" title="二、Shadowsocks 配置"></a>二、Shadowsocks 配置</h2><p>切换到Services -&gt; ShadowSocks<img src="opmenu.jpg" style="width: 67%;" /></p>
+<p>可以看到有三个服务可以选择</p>
+<ul>
+<li>Transparent Proxy</li>
+<li>SOCKS5 Proxy</li>
+<li>Port Forward</li>
+</ul>
+<p>其中Transparent Proxy是我们这次的主角，其本质是通过iptables和ipset的规则以及ss-redir来实现对流量的转发。SOCKS5 Proxy不做过多解释，最后的Port Forward可以用来进行转发DNS的查询。<br>在配置完所需服务和服务器后切换到Access Control选项卡，也就是对进行访问控制的管理，本质上就是各种iptables和ipsets的参数。<br><img src="/2019/04/04/OpenWrt/acctr.jpg" alt="Access Control"><br>其中Bypass IP List选择ChinaDNS CHNRoute也就是国内的路由表，这是<a target="_blank" rel="noopener" href="https://www.apnic.net/">APNIC</a>分配给中国的所有IP段，这样所有访问国内网站的流量就会直连而只有访问国外网站的流量才会被ss-redir转发，进而提升国内网站的访问效率。CHNRoute是跟随<a target="_blank" rel="noopener" href="https://github.com/aa65535/openwrt-chinadns">ChinaDNS</a>一同安装的，但默认安装的CHNRoute版本较老，可以用以下命令进行更新</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ wget -O- http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest | awk -F\| <span class="string">&#x27;/CN\|ipv4/ &#123; printf(&quot;%s/%d\n&quot;, $4, 32-log($5)/log(2)) &#125;&#x27;</span> &gt; /etc/chinadns_chnroute.txt</span><br></pre></td></tr></table></figure>
+<p>Zone LAN中Proxy Type有Direct Global Normal三种，对应直连、全局代理、透明代理，其中self proxy指的是是否代理路由器自身产生的流量。</p>
+<hr>
+<h2 id="三、解决DNS污染问题"><a href="#三、解决DNS污染问题" class="headerlink" title="三、解决DNS污染问题"></a>三、解决DNS污染问题</h2><p>至此，ShadowSocks的配置已经全部完成了，但是如果不解决DNS污染的问题，依旧会对日常的使用造成很大的影响。<br>从原理上来讲，ChinaDNS起到的作用只是一个优化路线的功能，尤其针对某些网站在国内和国外都有CDN的情况。ChinaDNS会将DNS请求同时发给国内DNS和可信DNS（通常为国外DNS），如果国内DNS返回的结果在CHNRoute中，则采用，如果国内DNS返回的结果不在CHNRoute中，则丢弃其结果并转而采用可信DNS返回的结果，从而起到一个优化路线的作用。  </p>
+<p>这样的方法有一个明显的缺陷，如果GFW放弃将域名污染到随机无效IP的方法而转而采用将域名污染到国内有效IP的情况下，ChinaDNS就会失效。但就目前来看，ChinaDNS的方案还是可行的。  </p>
+<p>还有一点需要注意的是，在ChinaDNS中，可信DNS的优先级高于国内DNS，也就是说如果可信DNS先于国内DNS返回结果，那么无论怎么样都会采用可信DNS的结果，因为这个特性，在ChinaDNS的上游是不应该有DNS缓存的，DNS缓存应当设置在ChinaDNS下游。</p>
+<h3 id="DNS-forwarder的配置"><a href="#DNS-forwarder的配置" class="headerlink" title="DNS-forwarder的配置"></a>DNS-forwarder的配置</h3><p>从上文的描述中我们知道，ChinaDNS上游的可信DNS是非常重要的，但是在国内的大多数ISP都有针对53端口的DNS查询都有投毒的情况，而且国内ISP的UDP不稳定，所以我选择用DNS-forwarder把DNS查询流量转换为TCP流量，并通过ss-redir进行转发到国外的DNS服务器，如果嫌麻烦的朋友也可以直接使用ss自带的port forward进行转发。</p>
+<p><img src="/2019/04/04/OpenWrt/dns-forwarder.jpg" alt="DNS-forwarder"><br>监听端口5353，我选择的DNS是Cloudflare的1.1.1.1，设置好了后我们将1.1.1.1手动添加到ShadowSocks的Access Control中的forward list中，保证DNS-forwarder的查询流量是经过ss-redir转发的。</p>
+<h3 id="ChinaDNS配置"><a href="#ChinaDNS配置" class="headerlink" title="ChinaDNS配置"></a>ChinaDNS配置</h3><p>接下来就是配置ChinaDNS了</p>
+<p><img src="/2019/04/04/OpenWrt/chinadns.jpg" alt="ChinaDNS"><br>其中有一个Bidirection Filter的选项，打开后如果国外DNS返回的结果在CHNRoute中，那么也不会被采用，通常情况下并不建议打开。</p>
+<p>Upstream Servers配置ChinaDNS的上游服务器，其中必须要包含至少一个国内DNS和一个国外DNS。</p>
+<p>顺带一提ChinaDNS判断是不是国内DNS是通过IP地址在不在CHNRoute中来判断的，所以如果想要用某些本地ISP提供的DNS作为国内DNS的话，一定要检查其IP地址是否在CHNRoute中。</p>
+<p>这里国内DNS我用的是114DNS，国外DNS经过DNS-forwarder转发，所以填上DNS-forwarder的监听地址和端口。</p>
+<p>还有一点需要注意的是地址和端口号之间使用”#”分隔而不是”:”</p>
+<hr>
+<h2 id="四、dnsmasq配置"><a href="#四、dnsmasq配置" class="headerlink" title="四、dnsmasq配置"></a>四、dnsmasq配置</h2><p>现在还剩下两个问题，一个是DHCP广播的DNS服务器，另一个是OpenWrt上本机的DNS服务器。</p>
+<h3 id="DHCP配置"><a href="#DHCP配置" class="headerlink" title="DHCP配置"></a>DHCP配置</h3><p>我们可以通过配置dnsmasq来进行转发DNS请求并缓存DNS查询的结果。</p>
+<p>切换到Network -&gt; DHCP and DNS</p>
+<p>首先DNS forwardings填入127.0.0.1#5353，也就是Chinadns的监听地址</p>
+<p><img src="/2019/04/04/OpenWrt/dhcp-2.jpg" alt="DHCP-forward"><br>接下来切换到Resolv and Hosts Files，勾选Ignore resolve file，否则DHCP会使用WAN口收到的公告的DNS服务器。</p>
+<p><img src="/2019/04/04/OpenWrt/dhcp-1.jpg" alt="DHCP-resolv"><br>这样相当于我们所有的DNS查询请求都首先交给dnsmasq进行转发并缓存，而dnsmasq则进一步将这些请求转发给Chinadns。</p>
+<p>这里所有的配置均在/etc/config/dhcp中</p>
+<p>至此所有连接到路由器的设备就应该可以正常使用了</p>
+<h3 id="OpenWrt本机的DNS服务器设置"><a href="#OpenWrt本机的DNS服务器设置" class="headerlink" title="OpenWrt本机的DNS服务器设置"></a>OpenWrt本机的DNS服务器设置</h3><p>现在就剩下路由器本身的DNS查询请求了</p>
+<p>切换到Network -&gt; Interfaces，进入到WAN口的配置中，切换到Advanced Settings选项卡，取消勾选<em>Use DNS Servers advertised by peer</em>并在<em>Use custom DNS servers</em>中填入127.0.0.1，这样的话所有路由器自身的DNS查询也会交给dnsmasq。</p>
+<p><img src="/2019/04/04/OpenWrt/wan-conf.jpg" alt="wan-dns"><br>这样所有从OpenWrt上产生的DNS查询也会交由dnsmasq进行转发。</p>
+<hr>
+<h2 id="五、番外"><a href="#五、番外" class="headerlink" title="五、番外"></a>五、番外</h2><h3 id="1、自定义不代理的域名"><a href="#1、自定义不代理的域名" class="headerlink" title="1、自定义不代理的域名"></a>1、自定义不代理的域名</h3><p>在dnsmasq的manpage中我们可以看到一个参数<code>--ipset=/&lt;domain&gt;[/&lt;domain&gt;...]/&lt;ipset&gt;[,&lt;ipset&gt;...]</code>这个参数的含义是将指定域名的查询结果加入到指定的ipset中，我们可以利用这个参数将我们自定义不代理的域名的解析结果加入到ss_spec_dst_bp这个ipset中便可以实现强制直连。</p>
+<h4 id="安装dnsmasq-full"><a href="#安装dnsmasq-full" class="headerlink" title="安装dnsmasq-full"></a>安装dnsmasq-full</h4><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">opkg update</span><br><span class="line">opkg install dnsmasq-full</span><br></pre></td></tr></table></figure>
+<p>这里会提示失败因为已经安装了<code>dnsmasq</code>，可以先将用<code>opkg download dnsmasq-full</code>将<code>dnsmasq-full</code>的包下载到本地，然后</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">opkg remove dnsmasq &amp;&amp; opkg install ./dnsmasq-full*.ipk</span><br></pre></td></tr></table></figure>
+
+<p>在<code>/etc/dnsmasq.conf</code>文件的末尾加上一行</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conf-dir=/etc/dnsmasq.d/</span><br></pre></td></tr></table></figure>
+
+<p>来使dnsmasq从指定的目录读取配置文件，如果这个文件夹不存在可以通过<code>mkdir -p /etc/dnsmasq.d</code>来建立。</p>
+<h4 id="添加china-list配置文件"><a href="#添加china-list配置文件" class="headerlink" title="添加china-list配置文件"></a>添加china-list配置文件</h4><p>这里主要用到的是<a target="_blank" rel="noopener" href="https://github.com/felixonmars/dnsmasq-china-list">china-list</a>也就是国内的域名列表，这个域名列表只包含指定dns服务器的内容，并没有我们需要的指定ipset的功能，所以我们需要对其进行一点修改，可以通过下面这行命令来完成这个操作</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget -O- https://raw.githubusercontent.com/felixonmars/dnsmasq-china-list/master/accelerated-domains.china.conf | awk -F <span class="string">&quot;/&quot;</span> <span class="string">&#x27;&#123;print $0; print &quot;ipset=/&quot;$2&quot;/ss_spec_dst_bp&quot;&#125;&#x27;</span> &gt; /etc/dnsmasq.d/china_list.conf</span><br></pre></td></tr></table></figure>
+
+<p>主要用到是awk。</p>
+<p>最后<code>/etc/init.d/dnsmasq restart</code>来重启dnsmasq</p>
+<h3 id="2、使用cron自动化"><a href="#2、使用cron自动化" class="headerlink" title="2、使用cron自动化"></a>2、使用cron自动化</h3><p>cron是一个用于周期性被执行的指令的工具。</p>
+<p>通过<code>crontab -e</code>可以编辑需要执行的指令</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">┌───────────── minute (0 - 59)</span><br><span class="line">│ ┌───────────── hour (0 - 23)</span><br><span class="line">│ │ ┌───────────── day of the month (1 - 31)</span><br><span class="line">│ │ │ ┌───────────── month (1 - 12)</span><br><span class="line">│ │ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday; 7 is also Sunday on some systems)</span><br><span class="line">│ │ │ │ │                                   </span><br><span class="line">│ │ │ │ │</span><br><span class="line">│ │ │ │ │</span><br><span class="line">* * * * * command to execute</span><br></pre></td></tr></table></figure>
+
+<p>例如我们想要每天更新一次china-list</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">30 3 * * * wget -O- https://raw.githubusercontent.com/felixonmars/dnsmasq-china-list/master/accelerated-domains.china.conf | awk -F &quot;/&quot; &#x27;&#123;print $0; print &quot;ipset=/&quot;$2&quot;/ss_spec_dst_bp&quot;&#125;&#x27; &gt; /etc/dnsmasq.d/china_list.conf &amp;&amp; /etc/init.d/dnsmasq restart</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Kevin Chen
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://kvcb.me/2019/04/04/OpenWrt/" title="OpenWrt透明代理的食用指南">https://kvcb.me/2019/04/04/OpenWrt/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+            </div>
+            <div class="post-nav-item">
+                <a href="/2019/05/22/dd-command/" rel="next" title="使用dd命令创建swap文件">
+                  使用dd命令创建swap文件 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kevin Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
