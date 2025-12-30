@@ -1,8 +1,7 @@
 ---
 title: OpenWrt 透明代理的食用指南
 date: 2019-04-04 18:10:16
-tags:
-categories: Tutorial
+tags: Tech
 updated: 2019-04-23 22:24:45
 typora-root-url: OpenWrt
 comments: false
