@@ -5,6 +5,7 @@ tags:
 categories: Tutorial
 updated: 2019-04-23 22:24:45
 typora-root-url: OpenWrt
+comments: false
 ---
 
 ![](logo.png)
